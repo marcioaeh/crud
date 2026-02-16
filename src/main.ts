@@ -5,4 +5,4 @@ import { appRoutes } from './app/app.routes';
 
 bootstrapApplication(AppComponent, {
   providers: [provideRouter(appRoutes)]
-}).catch((error: unknown) => console.error(error));
+}).catch((error) => console.error(error));

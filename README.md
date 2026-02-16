@@ -1,18 +1,17 @@
-# CRUD de Usuarios con Angular (documentado para estudio)
+# CRUD de Usuarios con Angular (documentado paso a paso)
 
-Este proyecto es un ejemplo **didáctico** de CRUD + login en Angular, con una sola tabla lógica llamada `usuarios`.
+Este proyecto es un ejemplo **didáctico** de un CRUD en Angular con una sola entidad: `usuarios`.
 
-## ¿Qué incluye?
+Incluye:
 
-- Login con usuario y contraseña.
-- Ruta protegida con `authGuard`.
+- Login con usuario/contraseña.
+- Pantalla protegida con guard (`authGuard`).
 - CRUD completo de usuarios:
   - Crear
   - Listar (tabla)
   - Editar
   - Eliminar
-- Persistencia en `localStorage` para no depender de backend.
-- Validaciones básicas de formulario (campos obligatorios y fecha no futura).
+- Persistencia en `localStorage` (sin backend, ideal para estudiar la lógica).
 
 > Usuario demo inicial: `admin` / `admin123`
 
@@ -40,56 +39,59 @@ src/
   styles.css
 ```
 
-### Rol de cada archivo principal
+### ¿Qué hace cada parte?
 
-- `app.routes.ts`: define rutas (`/login`, `/usuarios`) y protección.
-- `auth.guard.ts`: bloquea `/usuarios` sin sesión.
-- `usuario.model.ts`: contrato de datos de usuario.
-- `usuarios.service.ts`: CRUD + persistencia + normalización de datos.
-- `auth.service.ts`: login/logout y gestión de sesión.
-- `login-page.component.ts`: formulario de acceso.
-- `usuarios-page.component.ts`: formulario CRUD, validaciones y tabla.
+- **`usuario.model.ts`**: define la forma del objeto usuario (`id`, `nombre`, etc.).
+- **`usuarios.service.ts`**: lógica de negocio del CRUD y `localStorage`.
+- **`auth.service.ts`**: login/logout y control de sesión.
+- **`auth.guard.ts`**: protege la ruta `/usuarios` para que solo entre un usuario autenticado.
+- **`login-page.component.ts`**: formulario de login.
+- **`usuarios-page.component.ts`**: formulario de alta/edición + tabla + botones de acciones.
+- **`app.routes.ts`**: rutas principales de la aplicación.
 
 ---
 
-## 2) Tabla `usuarios`
+## 2) Modelo de datos
 
-Campos del modelo:
+La tabla lógica `usuarios` tiene estos campos:
 
-- `id`: number autoincremental
-- `nombre`: string
-- `apellido`: string
-- `fechaIngreso`: string (formato `YYYY-MM-DD`)
-- `username`: string único
-- `password`: string
+- `id`: número autoincremental.
+- `nombre`: texto.
+- `apellido`: texto.
+- `fechaIngreso`: fecha (`YYYY-MM-DD`).
+- `username`: texto único para login.
+- `password`: texto.
+
+> Nota didáctica: en producción, la contraseña **no** se guarda en texto plano y siempre hay backend + hash.
 
 ---
 
 ## 3) Flujo de autenticación
 
 1. El usuario entra a `/login`.
-2. `AuthService.login` valida con `UsuariosService.findByCredentials`.
-3. Si es correcto, se guarda `crud_auth_user` en `localStorage`.
-4. El guard permite acceder a `/usuarios`.
-5. Al cerrar sesión, se borra la clave y vuelve a `/login`.
+2. Se validan credenciales con `UsuariosService.findByCredentials`.
+3. Si son correctas, se guarda `crud_auth_user` en `localStorage`.
+4. El guard permite entrar a `/usuarios`.
+5. Al cerrar sesión, se limpia esa clave y se redirige al login.
 
 ---
 
 ## 4) Flujo CRUD
 
-En `/usuarios`:
+En la pantalla `/usuarios`:
 
 1. Se cargan usuarios desde `localStorage`.
-2. El formulario crea o actualiza según si existe `editId`.
-3. Se valida:
-   - campos obligatorios,
-   - fecha de ingreso no futura,
-   - `username` no repetido.
-4. La tabla permite editar o eliminar registros.
+2. Formulario permite crear o editar según `editId`.
+3. Se valida que `username` no esté repetido.
+4. La tabla muestra los usuarios y acciones:
+   - **Editar**: rellena formulario.
+   - **Eliminar**: borra registro.
 
 ---
 
-## 5) Ejecución local
+## 5) Cómo ejecutar en local
+
+> Requiere Node.js y npm con acceso al registro de paquetes.
 
 ```bash
 npm install
@@ -100,49 +102,20 @@ Luego abrir `http://localhost:4200`.
 
 ---
 
-## 6) Guía de estudio sugerida
+## 6) Ideas para seguir estudiando
 
-### Paso A: Modelo
-Lee `usuario.model.ts` y relaciona cada propiedad con los inputs del formulario.
-
-### Paso B: Servicio CRUD
-Revisa `usuarios.service.ts` en este orden:
-
-1. `loadUsuarios()`
-2. `getUsuarios()`
-3. `createUsuario()`
-4. `updateUsuario()`
-5. `deleteUsuario()`
-
-### Paso C: Autenticación
-Revisa `auth.service.ts` y `auth.guard.ts` para entender sesión y rutas protegidas.
-
-### Paso D: UI y eventos
-En `usuarios-page.component.ts`, sigue el flujo de:
-
-- `onSave()`
-- `startEdit()`
-- `remove()`
-- `validateForm()`
+- Migrar de `localStorage` a una API REST real (Node/Spring/.NET).
+- Añadir `ReactiveForms` y validaciones personalizadas.
+- Cifrar/hashear contraseña en backend.
+- Implementar roles (`admin`, `operador`, etc.).
+- Añadir paginación, búsqueda y ordenamiento en la tabla.
 
 ---
 
-## 7) Mejoras futuras recomendadas
+## 7) Nota de seguridad
 
-- Migrar a backend real (Node/Nest, Spring, .NET, etc.).
-- Reemplazar `localStorage` por API REST + base de datos.
-- Guardar contraseñas con hash (bcrypt/argon2) en backend.
-- Implementar roles y permisos.
-- Usar Reactive Forms con validaciones avanzadas.
+Este proyecto está pensado para **aprendizaje**. Para producción:
 
----
-
-## Nota de seguridad
-
-Este proyecto es para **aprendizaje**.
-
-En producción:
-
-- No guardar contraseñas en texto plano.
-- No confiar autenticación solo en frontend.
-- Usar backend seguro y tokens/sesiones robustas.
+- Nunca guardar contraseñas en texto plano.
+- Nunca confiar autenticación solo en frontend.
+- Usar JWT/sesiones con backend seguro.

@@ -4,12 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-/**
- * Componente de login.
- *
- * Muestra una validación simple de credenciales contra los usuarios
- * registrados en localStorage mediante AuthService.
- */
 @Component({
   selector: 'app-login-page',
   standalone: true,
@@ -101,12 +95,6 @@ export class LoginPageComponent {
 
   onSubmit(): void {
     this.errorMessage = '';
-
-    if (!this.username.trim() || !this.password.trim()) {
-      this.errorMessage = 'Completa usuario y contraseña.';
-      return;
-    }
-
     if (!this.authService.login(this.username, this.password)) {
       this.errorMessage = 'Usuario o contraseña inválidos.';
       return;

@@ -15,14 +15,6 @@ const EMPTY_FORM: UsuarioForm = {
   password: ''
 };
 
-/**
- * Pantalla principal del CRUD.
- *
- * Contiene:
- * - Formulario de alta/edición.
- * - Tabla de usuarios.
- * - Acciones de editar/eliminar.
- */
 @Component({
   selector: 'app-usuarios-page',
   standalone: true,
@@ -38,7 +30,7 @@ const EMPTY_FORM: UsuarioForm = {
       </header>
 
       <section class="card">
-        <h2>{{ editId !== null ? 'Editar usuario' : 'Crear usuario' }}</h2>
+        <h2>{{ editId ? 'Editar usuario' : 'Crear usuario' }}</h2>
         <form class="form-grid" (ngSubmit)="onSave()">
           <label>
             Nombre
@@ -68,8 +60,8 @@ const EMPTY_FORM: UsuarioForm = {
           <p *ngIf="message" [class.error]="isError" [class.ok]="!isError">{{ message }}</p>
 
           <div class="actions">
-            <button class="btn btn-primary" type="submit">{{ editId !== null ? 'Actualizar' : 'Guardar' }}</button>
-            <button *ngIf="editId !== null" class="btn" type="button" (click)="cancelEdit()">Cancelar</button>
+            <button class="btn btn-primary" type="submit">{{ editId ? 'Actualizar' : 'Guardar' }}</button>
+            <button *ngIf="editId" class="btn" type="button" (click)="cancelEdit()">Cancelar</button>
           </div>
         </form>
       </section>
@@ -200,21 +192,14 @@ export class UsuariosPageComponent implements OnInit {
   onSave(): void {
     this.clearMessage();
 
-    const validationError = this.validateForm();
-    if (validationError) {
-      this.setMessage(validationError, true);
-      return;
-    }
-
     if (this.usuariosService.existsUsername(this.form.username, this.editId ?? undefined)) {
       this.setMessage('El nombre de usuario ya existe.', true);
       return;
     }
 
-    if (this.editId !== null) {
+    if (this.editId) {
       const ok = this.usuariosService.updateUsuario(this.editId, { ...this.form });
       this.setMessage(ok ? 'Usuario actualizado correctamente.' : 'No se pudo actualizar.', !ok);
-
       if (ok) {
         this.cancelEdit();
       }
@@ -246,19 +231,12 @@ export class UsuariosPageComponent implements OnInit {
   }
 
   remove(id: number): void {
-    const confirmDelete = confirm('¿Seguro que deseas eliminar este usuario?');
-    if (!confirmDelete) {
-      return;
-    }
-
     this.clearMessage();
     const ok = this.usuariosService.deleteUsuario(id);
     this.setMessage(ok ? 'Usuario eliminado.' : 'No se encontró el usuario.', !ok);
-
     if (this.editId === id) {
       this.cancelEdit();
     }
-
     this.refresh();
   }
 
@@ -268,29 +246,6 @@ export class UsuariosPageComponent implements OnInit {
 
   private refresh(): void {
     this.usuarios = this.usuariosService.getUsuarios();
-  }
-
-  /**
-   * Validaciones mínimas para mantener ejemplo simple y didáctico.
-   */
-  private validateForm(): string | null {
-    if (!this.form.nombre.trim() || !this.form.apellido.trim() || !this.form.username.trim() || !this.form.password.trim()) {
-      return 'Completa todos los campos de texto.';
-    }
-
-    if (!this.form.fechaIngreso) {
-      return 'Debes seleccionar la fecha de ingreso.';
-    }
-
-    const selectedDate = new Date(this.form.fechaIngreso);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (selectedDate > today) {
-      return 'La fecha de ingreso no puede ser futura.';
-    }
-
-    return null;
   }
 
   private setMessage(message: string, isError: boolean): void {
